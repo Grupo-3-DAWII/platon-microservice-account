@@ -5,6 +5,7 @@ public record AccountResponse(
         String name,
         String lastname,
         String username,
+        Long idRole,
         String email,
         String nro,
         String direccion,

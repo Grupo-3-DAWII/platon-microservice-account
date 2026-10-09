@@ -8,6 +8,7 @@ import edu.cibertec.account.exception.ResourceNotFoundException;
 import edu.cibertec.account.repository.AccountRepository;
 import edu.cibertec.account.repository.StatusRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final StatusRepository statusRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<AccountResponse> findAll() {
         return accountRepository.findAll().stream()
@@ -43,6 +45,8 @@ public class AccountService {
                 .name(request.name())
                 .lastname(request.lastname())
                 .username(request.username())
+                .password(passwordEncoder.encode(request.password()))
+                .idRole(request.idRole())
                 .idStatus(status.getIdStatus())
                 .email(request.email())
                 .nro(request.nro())
@@ -60,6 +64,10 @@ public class AccountService {
         account.setName(request.name());
         account.setLastname(request.lastname());
         account.setUsername(request.username());
+        account.setIdRole(request.idRole());
+        if (request.password() != null && !request.password().isBlank()) {
+            account.setPassword(passwordEncoder.encode(request.password()));
+        }
         account.setIdStatus(status.getIdStatus());
         account.setEmail(request.email());
         account.setNro(request.nro());
@@ -91,6 +99,7 @@ public class AccountService {
                 account.getName(),
                 account.getLastname(),
                 account.getUsername(),
+                account.getIdRole(),
                 account.getEmail(),
                 account.getNro(),
                 account.getDireccion(),

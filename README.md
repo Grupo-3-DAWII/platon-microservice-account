@@ -7,6 +7,7 @@ Microservicio backend para gestion de cuentas. Esta configurado con Java, Spring
 - Java 21 o superior
 - Maven 3.9 o superior
 - Docker Desktop, opcional para levantar PostgreSQL local
+- `platon-eureka-server`, opcional para registrarlo en Eureka
 
 ## Base de datos local
 
@@ -49,10 +50,12 @@ docker compose up -d
 mvn spring-boot:run
 ```
 
+Si `platon-eureka-server` esta levantado, este microservicio se registra como `platon-microservice-account`.
+
 Credenciales HTTP Basic para pruebas:
 
 - admin: `admin` / `admin123`
-- lectura: `student` / `student123`
+- usuario: `usuario` / `usuario123`
 
 ## Endpoints
 
@@ -74,5 +77,5 @@ Ejemplo de registro:
 ```bash
 curl -u admin:admin123 -X POST http://localhost:8080/api/accounts ^
   -H "Content-Type: application/json" ^
-  -d "{\"name\":\"Ana\",\"lastname\":\"Torres\",\"username\":\"atorres\",\"email\":\"ana@demo.com\",\"nro\":\"999888777\",\"direccion\":\"Av. Lima 123\",\"idStatus\":1}"
+  -d "{\"name\":\"Ana\",\"lastname\":\"Torres\",\"username\":\"atorres\",\"password\":\"ana123\",\"email\":\"ana@demo.com\",\"nro\":\"999888777\",\"direccion\":\"Av. Lima 123\",\"idStatus\":1}"
 ```

@@ -8,7 +8,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
@@ -37,17 +37,17 @@ public class SecurityConfig {
                 .roles("ADMIN")
                 .build();
 
-        UserDetails student = User.builder()
-                .username("student")
-                .password(passwordEncoder.encode("student123"))
+        UserDetails usuario = User.builder()
+                .username("usuario")
+                .password(passwordEncoder.encode("usuario123"))
                 .roles("USER")
                 .build();
 
-        return new InMemoryUserDetailsManager(admin, student);
+        return new InMemoryUserDetailsManager(admin, usuario);
     }
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 }

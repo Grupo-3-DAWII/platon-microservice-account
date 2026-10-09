@@ -12,7 +12,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "account")
+@Table(name = "users", schema = "account")
 public class Account {
 
     @Id
@@ -27,6 +27,12 @@ public class Account {
 
     @Column("username")
     private String username;
+
+    @Column("password")
+    private String password;
+
+    @Column("idrole")
+    private Long idRole;
 
     @Column("idstatus")
     private Long idStatus;
