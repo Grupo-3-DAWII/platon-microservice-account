@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -45,4 +46,7 @@ public class Account {
 
     @Column("direccion")
     private String direccion;
+
+    @Column("created_at")
+    private LocalDateTime createdAt;
 }

@@ -1,7 +1,10 @@
 package edu.cibertec.account.controller;
 
 import edu.cibertec.account.dto.AccountRequest;
+import edu.cibertec.account.dto.AccountFilterRequest;
+import edu.cibertec.account.dto.AccountListResponse;
 import edu.cibertec.account.dto.AccountResponse;
+import edu.cibertec.account.dto.PageResponse;
 import edu.cibertec.account.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -13,9 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/accounts")
@@ -25,13 +27,18 @@ public class AccountController {
     private final AccountService accountService;
 
     @GetMapping
-    public List<AccountResponse> findAll() {
-        return accountService.findAll();
+    public PageResponse<AccountListResponse> findAll(@ModelAttribute AccountFilterRequest filters) {
+        return accountService.findAll(filters);
     }
 
     @GetMapping("/{id}")
     public AccountResponse findById(@PathVariable Long id) {
         return accountService.findById(id);
+    }
+
+    @GetMapping("/staff")
+    public PageResponse<AccountListResponse> findStaff(@ModelAttribute AccountFilterRequest filters) {
+        return accountService.findStaff(filters);
     }
 
     @GetMapping("/validate/{username}")
