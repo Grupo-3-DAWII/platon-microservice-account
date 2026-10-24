@@ -10,7 +10,7 @@ services:
       DB_PASSWORD: account_pass
       CONFIG_SERVER_URL: ${CONFIG_SERVER_URL:-http://host.docker.internal:8888}
       EUREKA_SERVER_URL: http://host.docker.internal:8761/eureka/
-      EUREKA_INSTANCE_HOSTNAME: localhost
+      EUREKA_INSTANCE_HOSTNAME: host.docker.internal
       SERVER_PORT: 8083
       RABBITMQ_HOST: host.docker.internal
     extra_hosts:
