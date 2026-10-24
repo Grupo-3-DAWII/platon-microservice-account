@@ -1,0 +1,19 @@
+services:
+  app:
+    build:
+      context: .
+    container_name: platon-account-api
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://host.docker.internal:5432/account_db?currentSchema=products
+      DB_USERNAME: account_user
+      DB_PASSWORD: account_pass
+      CONFIG_SERVER_URL: ${CONFIG_SERVER_URL:-http://host.docker.internal:8888}
+      EUREKA_SERVER_URL: http://host.docker.internal:8761/eureka/
+      EUREKA_INSTANCE_HOSTNAME: localhost
+      SERVER_PORT: 8083
+      RABBITMQ_HOST: host.docker.internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8083:8083"
