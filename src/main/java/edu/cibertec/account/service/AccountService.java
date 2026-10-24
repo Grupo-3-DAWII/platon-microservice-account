@@ -106,6 +106,24 @@ public class AccountService {
     }
 
     @Transactional
+    public AccountResponse updateContact(Long id, edu.cibertec.account.dto.ContactRequest request) {
+        Account account = findAccount(id);
+        String phone = request.nro() == null ? "" : request.nro().replaceAll("[ +()\\-]", "");
+        String address = request.direccion() == null ? "" : request.direccion().strip().replaceAll("\\s+", " ");
+        if (!phone.matches("[0-9]{7,15}")) throw new IllegalArgumentException("Ingresa un teléfono válido");
+        if (address.length() < 5 || address.length() > 180 || address.codePoints().anyMatch(Character::isISOControl)) {
+            throw new IllegalArgumentException("Ingresa una dirección válida");
+        }
+        String current = account.getNro() == null ? "" : account.getNro().replaceAll("[ +()\\-]", "");
+        if (!phone.equals(current) && accountRepository.hasContact(phone)) {
+            throw new IllegalArgumentException("Este teléfono ya está registrado");
+        }
+        account.setNro(phone);
+        account.setDireccion(address);
+        return toResponse(accountRepository.save(account));
+    }
+
+    @Transactional
     public void delete(Long id) {
         Account account = findAccount(id);
         accountRepository.delete(account);

@@ -43,11 +43,11 @@ public class AccountListRepository {
                 JOIN account.roles user_role ON user_role.idrole = buyer.idrole
                 LEFT JOIN (
                     SELECT sale.id_user, COUNT(*) AS paid_order_count,
-                           SUM(sale.number_sold * product.sale_price) AS total_purchases
+                           SUM(COALESCE(sale.total_amount, sale.number_sold * product.sale_price, 0)) AS total_purchases
                     FROM payment.products_sold sale
                     JOIN payment.state_sold sale_status
                         ON sale_status.id_state_sold = sale.id_state_sold
-                    JOIN products.product product ON product.idproduct = sale.id_products
+                    LEFT JOIN products.product product ON product.idproduct = sale.id_products
                     WHERE UPPER(TRIM(sale_status.name_state)) = 'PAGADO'
                     GROUP BY sale.id_user
                 ) purchases ON purchases.id_user = buyer.iduser

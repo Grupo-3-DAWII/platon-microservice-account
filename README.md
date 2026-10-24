@@ -51,7 +51,8 @@ Los roles son `ADMIN`, `USER` y `SELLER`. Consulta `GET /api/roles` para obtener
 - `paidOrderCount`: cantidad de pedidos en estado `PAGADO`.
 - `totalPurchases`: suma de los importes de esos pedidos.
 
-Los filtros se aplican antes de paginar. Parámetros opcionales:
+- `paidOrderCount`: cantidad de registros de `payment.products_sold` con estado `PAGADO`.
+- `totalPurchases`: suma del `total_amount` guardado en las ventas pagadas. Para ventas antiguas sin ese importe, conserva el cálculo anterior de cantidad por precio del catálogo.
 
 | Parámetro | Descripción | Por defecto |
 | --- | --- | --- |
@@ -64,7 +65,21 @@ Los filtros se aplican antes de paginar. Parámetros opcionales:
 curl "http://localhost:8083/api/accounts?page=0&size=10&active=true&minPaidOrders=5"
 ```
 
-## Orden recomendado
+Los pedidos `PENDIENTE` y `CANCELADO` quedan fuera de ambos calculos.
+Los usuarios sin pedidos pagados aparecen con ambos valores en cero.
+Cada registro de `products_sold` cuenta como un pedido, independientemente de la cantidad de unidades.
+La consulta usa los esquemas compartidos `account`, `payment` y `products`.
+No requiere crear otra tabla de pedidos.
+
+Las ventas nuevas conservan su importe en `payment.products_sold.total_amount`, aunque cambie el precio del catálogo. Las ventas antiguas que no tienen ese importe siguen usando el precio actual del producto como compatibilidad con los datos anteriores.
+
+Ejemplo:
+
+```bash
+curl -u admin:admin123 http://localhost:8083/api/accounts
+```
+
+Ejemplo de registro:
 
 1. `platon-eureka-server`
 2. `platon-config-server`
