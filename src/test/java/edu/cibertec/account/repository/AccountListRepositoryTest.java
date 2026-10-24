@@ -39,7 +39,7 @@ class AccountListRepositoryTest {
         jdbc.execute("""
                 CREATE TABLE payment.products_sold (
                     id_products_sold BIGINT PRIMARY KEY, id_products BIGINT,
-                    id_user BIGINT, number_sold INTEGER, id_state_sold BIGINT)
+                    id_user BIGINT, number_sold INTEGER, id_state_sold BIGINT, total_amount NUMERIC(18,2))
                 """);
         jdbc.update("INSERT INTO account.status VALUES (1, 'active'), (2, 'inactive')");
         jdbc.update("""
@@ -51,7 +51,7 @@ class AccountListRepositoryTest {
         jdbc.update("INSERT INTO payment.state_sold VALUES (1, 'PAGADO'), (2, 'PENDIENTE'), (3, 'CANCELADO')");
         jdbc.update("INSERT INTO products.product VALUES (1, 10.25), (2, 5.10)");
         jdbc.update("""
-                INSERT INTO payment.products_sold VALUES
+                INSERT INTO payment.products_sold (id_products_sold, id_products, id_user, number_sold, id_state_sold) VALUES
                     (1, 1, 1, 2, 1), (2, 2, 1, 3, 1),
                     (3, 1, 1, 100, 2), (4, 1, 1, 100, 3),
                     (5, 1, 2, 100, 2), (6, 1, 2, 100, 3)
@@ -145,7 +145,7 @@ class AccountListRepositoryTest {
     void moreThanFourPurchasesRequiresFivePaidOrdersAndCombinesWithStatus() {
         var jdbc = new JdbcTemplate(database);
         jdbc.update("""
-                INSERT INTO payment.products_sold VALUES
+                INSERT INTO payment.products_sold (id_products_sold, id_products, id_user, number_sold, id_state_sold) VALUES
                     (7, 1, 1, 1, 1), (8, 1, 1, 1, 1),
                     (9, 1, 2, 1, 1), (10, 1, 2, 1, 1), (11, 1, 2, 1, 1),
                     (12, 1, 2, 1, 1), (13, 1, 2, 1, 1)
@@ -162,4 +162,35 @@ class AccountListRepositoryTest {
         assertThat(active.getTotalElements()).isZero();
         assertThat(inactive.getTotalElements()).isEqualTo(1);
     }
+    @Test
+    void includesGroupedPaidSalesWithoutLegacyProductColumnsAndIgnoresOtherStates() {
+        var jdbc = new JdbcTemplate(database);
+        jdbc.update("""
+                INSERT INTO payment.products_sold
+                    (id_products_sold, id_user, id_state_sold, total_amount) VALUES
+                    (7, 1, 1, 153.00), (8, 1, 1, 0.00),
+                    (9, 1, 2, 200.00), (10, 1, 3, 50.00)
+                """);
+        var ana = repository.findAll(PageRequest.of(0, 20), null, 0).getContent().getFirst();
+        assertThat(ana.paidOrderCount()).isEqualTo(4);
+        assertThat(ana.totalPurchases()).isEqualByComparingTo("188.80");
+        assertThat(repository.findAll(PageRequest.of(0, 20), null, 4).getContent())
+                .extracting(account -> account.idUser()).containsExactly(1L);
+    }
+
+    @Test
+    void storedSaleAmountIsPreservedWhenCatalogPricesChange() {
+        var jdbc = new JdbcTemplate(database);
+        jdbc.update("""
+                INSERT INTO payment.products_sold
+                    (id_products_sold, id_products, id_user, number_sold, id_state_sold, total_amount)
+                    VALUES (7, 2, 3, 2, 1, 17.00)
+                """);
+        jdbc.update("UPDATE products.product SET sale_price = 999.00 WHERE idproduct = 2");
+        var maria = repository.findAll(PageRequest.of(0, 20), null, 1).getContent().stream()
+                .filter(account -> account.idUser() == 3L).findFirst().orElseThrow();
+        assertThat(maria.paidOrderCount()).isEqualTo(1);
+        assertThat(maria.totalPurchases()).isEqualByComparingTo("17.00");
+    }
+
 }

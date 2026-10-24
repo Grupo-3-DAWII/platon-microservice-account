@@ -26,6 +26,12 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @PutMapping("/me/contact")
+    public AccountResponse updateContact(@org.springframework.web.bind.annotation.RequestHeader("X-Platon-User-Id") Long userId,
+            @RequestBody edu.cibertec.account.dto.ContactRequest request) {
+        return accountService.updateContact(userId, request);
+    }
+
     @GetMapping
     public PageResponse<AccountListResponse> findAll(@ModelAttribute AccountFilterRequest filters) {
         return accountService.findAll(filters);

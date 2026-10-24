@@ -114,7 +114,7 @@ La base local existente ya tiene los tres roles y conserva sus identificadores a
 y agrega por cada usuario:
 
 - `paidOrderCount`: cantidad de registros de `payment.products_sold` con estado `PAGADO`.
-- `totalPurchases`: suma de `number_sold * products.product.sale_price` de esos pedidos pagados.
+- `totalPurchases`: suma del `total_amount` guardado en las ventas pagadas. Para ventas antiguas sin ese importe, conserva el cálculo anterior de cantidad por precio del catálogo.
 
 El listado ahora devuelve un objeto paginado (antes devolvia un arreglo):
 `content`, `page`, `size`, `totalElements`, `totalPages`, `first`, `last`.
@@ -146,9 +146,7 @@ Cada registro de `products_sold` cuenta como un pedido, independientemente de la
 La consulta usa los esquemas compartidos `account`, `payment` y `products`.
 No requiere crear otra tabla de pedidos.
 
-La tabla actual no guarda el precio historico de la compra: `totalPurchases`
-usa el precio de venta actual del producto y cambiara si se modifica ese precio.
-Para conservar el importe realmente pagado se debe guardar el precio o total al registrar cada compra.
+Las ventas nuevas conservan su importe en `payment.products_sold.total_amount`, aunque cambie el precio del catálogo. Las ventas antiguas que no tienen ese importe siguen usando el precio actual del producto como compatibilidad con los datos anteriores.
 
 Ejemplo:
 
